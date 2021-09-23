@@ -28,7 +28,7 @@ jobs:
       - name: Setup&Build
         run: |
           flutter pub get
-          flutter build web --base-href="${{ env.BASE_DIR }}"
+          flutter build web --base-href="${{ env.BASE_DIR }}" --profile
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
