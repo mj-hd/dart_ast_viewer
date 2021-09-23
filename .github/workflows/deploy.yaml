@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  VERSION: '2.2.3'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.pub-cache
+          key: pubspec-${{ hashFiles('./pubspec.lock') }}
+          restore-keys: pubspec-
+
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: ${{ env.VERSION }}
+
+      - name: Setup&Build
+        run: |
+          flutter pub get
+          flutter build web
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
