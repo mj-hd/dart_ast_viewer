@@ -7,6 +7,7 @@ on:
 
 env:
   VERSION: '2.5.0'
+  BASE_DIR: '/dart_ast_viewer/'
 
 jobs:
   deploy:
@@ -27,7 +28,7 @@ jobs:
       - name: Setup&Build
         run: |
           flutter pub get
-          flutter build web
+          flutter build web --base-href="${{ env.BASE_DIR }}"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
