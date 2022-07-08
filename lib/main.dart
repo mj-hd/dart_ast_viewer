@@ -49,55 +49,71 @@ class MyHomePage extends HookWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
+            flex: 2,
             child: Container(
               color: Colors.white,
               padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: controller,
-                autofocus: true,
-                autocorrect: false,
-                expands: true,
-                maxLines: null,
-                minLines: null,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true,
+                      autocorrect: false,
+                      expands: true,
+                      maxLines: null,
+                      minLines: null,
+                      decoration: InputDecoration.collapsed(
+                        hintText: 'Enter your source code...',
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        result.value = compileCode(controller.value.text);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'parsing error: ${e.toString()}',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('convert'),
+                  ),
+                ],
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              try {
-                result.value = compileCode(controller.value.text);
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'parsing error: ${e.toString()}',
-                    ),
-                  ),
-                );
-              }
-            },
-            child: const Text('convert'),
-          ),
           Expanded(
-            child: InteractiveViewer(
-              constrained: false,
-              boundaryMargin: const EdgeInsets.all(100),
-              minScale: 0.01,
-              maxScale: 10.00,
-              child: GraphView(
-                graph: graph,
-                algorithm:
-                    BuchheimWalkerAlgorithm(config, TreeEdgeRenderer(config)),
-                paint: Paint()
-                  ..color = Colors.blue
-                  ..strokeWidth = 1
-                  ..style = PaintingStyle.stroke,
-                builder: (Node node) {
-                  return AstNodeWidget(
-                    id: node.key!.value,
-                    nodes: nodes,
-                  );
-                },
+            flex: 3,
+            child: ColoredBox(
+              color: Colors.grey.shade200,
+              child: InteractiveViewer(
+                constrained: false,
+                boundaryMargin: const EdgeInsets.all(100),
+                minScale: 0.01,
+                maxScale: 10.00,
+                child: graph.hasNodes()
+                    ? GraphView(
+                        graph: graph,
+                        algorithm: BuchheimWalkerAlgorithm(
+                            config, TreeEdgeRenderer(config)),
+                        paint: Paint()
+                          ..color = Colors.blue
+                          ..strokeWidth = 1
+                          ..style = PaintingStyle.stroke,
+                        builder: (Node node) {
+                          return AstNodeWidget(
+                            id: node.key!.value,
+                            nodes: nodes,
+                          );
+                        },
+                      )
+                    : const SizedBox(),
               ),
             ),
           ),
