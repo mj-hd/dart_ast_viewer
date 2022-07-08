@@ -40,6 +40,7 @@ class MyHomePage extends HookWidget {
       () => result.value != null ? toGraph(nodes, result.value!.root) : Graph(),
       [nodes, result.value],
     );
+    final overlayNodeId = useState<int?>(null);
 
     return Scaffold(
       appBar: AppBar(
@@ -92,28 +93,45 @@ class MyHomePage extends HookWidget {
             flex: 3,
             child: ColoredBox(
               color: Colors.grey.shade200,
-              child: InteractiveViewer(
-                constrained: false,
-                boundaryMargin: const EdgeInsets.all(100),
-                minScale: 0.01,
-                maxScale: 10.00,
-                child: graph.hasNodes()
-                    ? GraphView(
-                        graph: graph,
-                        algorithm: BuchheimWalkerAlgorithm(
-                            config, TreeEdgeRenderer(config)),
-                        paint: Paint()
-                          ..color = Colors.blue
-                          ..strokeWidth = 1
-                          ..style = PaintingStyle.stroke,
-                        builder: (Node node) {
-                          return AstNodeWidget(
-                            id: node.key!.value,
-                            nodes: nodes,
-                          );
-                        },
-                      )
-                    : const SizedBox(),
+              child: Stack(
+                children: [
+                  InteractiveViewer(
+                    constrained: false,
+                    boundaryMargin: const EdgeInsets.all(100),
+                    minScale: 0.01,
+                    maxScale: 10.00,
+                    child: graph.hasNodes()
+                        ? GraphView(
+                            graph: graph,
+                            algorithm: BuchheimWalkerAlgorithm(
+                                config, TreeEdgeRenderer(config)),
+                            paint: Paint()
+                              ..color = Colors.blue
+                              ..strokeWidth = 1
+                              ..style = PaintingStyle.stroke,
+                            builder: (Node node) {
+                              return AstNodeWidget(
+                                id: node.key!.value,
+                                nodes: nodes,
+                                color: Colors.black12,
+                                constrained: true,
+                                onPressed: () =>
+                                    overlayNodeId.value = node.key!.value,
+                              );
+                            },
+                          )
+                        : const SizedBox(),
+                  ),
+                  if (overlayNodeId.value != null)
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: AstNodeWidget(
+                        id: overlayNodeId.value!,
+                        nodes: nodes,
+                        color: Theme.of(context).primaryColor.withAlpha(60),
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -128,21 +146,47 @@ class AstNodeWidget extends HookWidget {
     Key? key,
     required this.id,
     required this.nodes,
+    this.color,
+    this.constrained = false,
+    this.onPressed,
   }) : super(key: key);
 
   final int id;
   final Map<int, AstNode> nodes;
+  final Color? color;
+  final bool constrained;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final text = nodes[id] != null ? toStringNode(nodes[id]!) : 'UNKNOWN';
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black12,
-        borderRadius: BorderRadius.circular(4),
+    final node = nodes[id];
+    final mediaWidth = MediaQuery.of(context).size.width;
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        constraints:
+            constrained ? BoxConstraints(maxWidth: mediaWidth * 0.2) : null,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Text(
+                node?.toSource() ?? 'UNKNOWN',
+                maxLines: constrained ? 3 : null,
+                overflow: constrained ? TextOverflow.ellipsis : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('type: ${node.runtimeType}'),
+          ],
+        ),
       ),
-      child: Text(text),
     );
   }
 }
@@ -180,13 +224,4 @@ void traverse(
       traverse(graph, nodes, node, child);
     }
   }
-}
-
-String toStringNode(AstNode node) {
-  final result = StringBuffer();
-
-  result.writeln('$node');
-  result.writeln('type: ${node.runtimeType}');
-
-  return result.toString();
 }
