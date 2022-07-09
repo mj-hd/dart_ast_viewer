@@ -129,6 +129,7 @@ class MyHomePage extends HookWidget {
                         id: overlayNodeId.value!,
                         nodes: nodes,
                         color: Theme.of(context).primaryColor.withAlpha(60),
+                        onPressed: () => overlayNodeId.value = null,
                       ),
                     ),
                 ],
