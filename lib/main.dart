@@ -106,17 +106,19 @@ class MyHomePage extends HookWidget {
                             algorithm: BuchheimWalkerAlgorithm(
                                 config, TreeEdgeRenderer(config)),
                             paint: Paint()
-                              ..color = Colors.blue
+                              ..color = Colors.blue.shade200
                               ..strokeWidth = 1
                               ..style = PaintingStyle.stroke,
                             builder: (Node node) {
+                              final id = node.key!.value;
                               return AstNodeWidget(
-                                id: node.key!.value,
+                                id: id,
                                 nodes: nodes,
-                                color: Colors.black12,
+                                color: id == overlayNodeId.value
+                                    ? Colors.blue.shade300
+                                    : Colors.grey.shade400,
                                 constrained: true,
-                                onPressed: () =>
-                                    overlayNodeId.value = node.key!.value,
+                                onPressed: () => overlayNodeId.value = id,
                               );
                             },
                           )
@@ -128,7 +130,7 @@ class MyHomePage extends HookWidget {
                       child: AstNodeWidget(
                         id: overlayNodeId.value!,
                         nodes: nodes,
-                        color: Theme.of(context).primaryColor.withAlpha(60),
+                        color: Colors.blue.shade600.withOpacity(0.6),
                         onPressed: () => overlayNodeId.value = null,
                       ),
                     ),
