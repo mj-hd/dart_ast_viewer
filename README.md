@@ -4,4 +4,4 @@ AST Viewer for Dart language.
 
 https://mj-hd.github.io/dart_ast_viewer/
 
-![image](https://user-images.githubusercontent.com/6854255/134461809-883d216c-682e-47fb-9889-96fc3b955596.png)
+![screenshot](https://user-images.githubusercontent.com/6854255/178127758-5a70d953-3c60-40d8-97dd-1a63721994b8.png)
