@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  VERSION: '2.5.0'
+  VERSION: '3.0.4'
   BASE_DIR: '/dart_ast_viewer/'
 
 jobs:
